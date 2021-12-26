@@ -1,6 +1,7 @@
 from gldb.mongo import MongoClient
 from gldb.postgres import PostgresSession
 
+
 def app():
     with MongoClient() as client:
         db = client.web
