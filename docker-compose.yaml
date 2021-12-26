@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    env_file:
+      - ./.env
+    restart: unless-stopped
+    volumes:
+      - mongo_data:${MONGO_DATA_DIR}:rw
+      - ./gldb/docker/mongo_scripts/:/docker-entrypoint-initdb.d/:ro
+    command: mongod --auth
+    networks:
+      - backend_net
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    env_file:
+      - ./.env
+    restart: unless-stopped
+    volumes:
+      - postgres_data:${POSTGRES_DATA_DIR}:rw
+      - ./gldb/docker/postgres_scripts/:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - backend_net
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+
+  # etlapp:
+  #   build:
+  #     context: ./gletl
+  #     dockerfile: ./docker/Dockerfile
+  #   container_name: etlapp
+  #   env_file:
+  #     - ./.env
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ../:/workspace
+  #   command: tail -f /dev/null
+  #   depends_on:
+  #     - mongodb
+  #   networks:
+  #     - backend_net
+
+networks:
+  backend_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
+
+  postgres_data:
+    driver: local
